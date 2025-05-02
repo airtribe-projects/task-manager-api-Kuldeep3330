@@ -29,6 +29,10 @@ tap.test("GET /tasks", async (t) => {
     t.end();
   });
 
+const getAllTasks= async(req, res)=>{
+    res.status(200).json(tasks)
+}
+
     
 
-module.exports = { taskCreated };
+module.exports = { taskCreated, getAllTasks };
