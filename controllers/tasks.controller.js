@@ -3,55 +3,114 @@ const path = require('path')
 
 const filePath = path.join(__dirname, '../task.json')
 
-let taskData = require(filePath)
+function readTasks() {
+    if (!fs.existsSync(filePath)) return [];
+    const data = fs.readFileSync(filePath, 'utf-8');
+    try {
+      const parsed = JSON.parse(data);
+      return parsed.tasks || [];
+    } catch (err) {
+      return [];
+    }
+  }
 
-let tasks = taskData.tasks
-let idCounter = tasks.length + 1
+// let tasks = JSON.parse(fs.readFileSync(filePath, 'utf-8')).tasks;
 
 const taskCreated = async (req, res) => {
   const { title, description, completed } = req.body
   if (!title || !description)
     return res.status(400).json({ error: 'tasks with invalid data' })
+  const tasks = readTasks();
+  const idCounter =
+    tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1
 
-  const task = {
-    id: idCounter++,
+  const newTask = {
+    id: idCounter,
     title,
     description,
     completed: completed ?? false,
   }
-  tasks.push(task)
-  res.status(201).json(task)
+  tasks.push(newTask)
+  fs.writeFileSync(filePath, JSON.stringify({ tasks }, null, 2))
+  res.status(201).json(newTask)
 }
 
 const getAllTasks = async (req, res) => {
-  res.status(200).json(tasks)
+  try {
+    const tasks = readTasks();
+    res.status(200).json(tasks)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to read tasks' })
+  }
 }
 
 const getTaskById = async (req, res) => {
-  const id = parseInt(req.params.id)
-  const task = tasks.find((task) => task.id === id)
-  if (!task) res.status(400).json({ error: 'incorrect id || task not found' })
+  try {
+    const id = parseInt(req.params.id)
+    const tasks = readTasks();
 
-  res.status(200).json(task)
-}
-
-const updateTaskById= async(req, res)=>{
-    const id= parseInt(req.params.id)
-    const {title, description, completed}= req.body;
-    if(!title || !description || typeof completed !=='boolean'){
-        return res.status(400).json({error:"invalid data"})
+    const task = tasks.find((task) => task.id === id)
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' })
     }
 
-    const taskInd = tasks.findIndex((task) => task.id === id)
-    if (taskInd === -1) res.status(404).json({ error: 'task not found' })
-    
-    tasks[taskInd]={id, title, description, completed}
+    res.status(200).json(task)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to read task data' })
+  }
+}
 
+const updateTaskById = async (req, res) => {
+  const id = parseInt(req.params.id)
+  const { title, description, completed } = req.body
+  if (!title || !description || typeof completed !== 'boolean') {
+    return res.status(400).json({
+      error: 'Invalid data. Ensure title and description are strings and completed is a boolean.',
+    });
+  }
+
+  try {
+    const tasks = readTasks();
+
+    const taskInd = tasks.findIndex((task) => task.id === id)
+    if (taskInd === -1) {
+      return res.status(404).json({ error: 'invalid id' })
+    }
+
+    tasks[taskInd] = { id, title, description, completed }
     fs.writeFileSync(filePath, JSON.stringify({ tasks }, null, 2))
 
     res.status(200).json(tasks[taskInd])
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update task' })
+  }
 }
 
+const deleteTaskById = async (req, res) => {
+  const id = parseInt(req.params.id)
 
+  try {
+    const tasks = readTasks();
 
-module.exports = { taskCreated, getAllTasks, getTaskById, updateTaskById }
+    const taskInd = tasks.findIndex((task) => task.id === id)
+
+    if (taskInd === -1) {
+      return res.status(404).json({ error: 'invalid id' })
+    }
+
+    const deletedTask = tasks.splice(taskInd, 1)[0]
+    fs.writeFileSync(filePath, JSON.stringify({ tasks }, null, 2))
+
+    res.status(200).json(deletedTask)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete task' })
+  }
+}
+
+module.exports = {
+  taskCreated,
+  getAllTasks,
+  getTaskById,
+  updateTaskById,
+  deleteTaskById,
+}

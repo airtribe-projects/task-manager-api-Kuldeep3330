@@ -1,12 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1,
-      "title": "Set up environment",
-      "description": "Install Node.js, npm, and git",
-      "completed": true
-    },
-    {
       "id": 2,
       "title": "Create a new project",
       "description": "Create a new project using the Express application generator",
@@ -74,20 +68,32 @@
     },
     {
       "id": 13,
-      "title": "Install connect-mongo",
-      "description": "Install connect-mongo",
-      "completed": false
-    },
-    {
-      "id": 14,
       "title": "Install dotenv",
       "description": "Install dotenv",
       "completed": false
     },
     {
+      "id": 14,
+      "title": "Install connect-mongo 1",
+      "description": "Install connect-mongo 1",
+      "completed": false
+    },
+    {
       "id": 15,
+      "title": "Install connect-mongo 3",
+      "description": "Install connect-mongo 3",
+      "completed": false
+    },
+    {
+      "id": 16,
       "title": "Install jsonwebtoken",
-      "description": "npm Install jsonwebtoken",
+      "description": "Install jsonwebtoken",
+      "completed": false
+    },
+    {
+      "id": 17,
+      "title": "New Task",
+      "description": "New Task Description",
       "completed": false
     }
   ]
