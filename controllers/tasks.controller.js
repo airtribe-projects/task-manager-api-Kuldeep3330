@@ -1,38 +1,40 @@
-let tasks=[];
-let idCounter=1
+const fs = require('fs')
+const path = require('path')
 
-const taskCreated=async(req, res)=>{
-    const{title, description,completed }= req.body;
-    if(!title || !description ) return res.status(400).json({error:"tasks with invalid data"})
+const filePath = path.join(__dirname, '../task.json')
 
-    const task={
-        id:idCounter++,
-        title,
-        description,
-        completed: completed ?? false}
-    tasks.push(task)
-    res.status(201).json(task);
+let taskData = require(filePath)
 
+let tasks = taskData.tasks
+let idCounter = tasks.length + 1
+
+const taskCreated = async (req, res) => {
+  const { title, description, completed } = req.body
+  if (!title || !description)
+    return res.status(400).json({ error: 'tasks with invalid data' })
+
+  const task = {
+    id: idCounter++,
+    title,
+    description,
+    completed: completed ?? false,
+  }
+  tasks.push(task)
+  res.status(201).json(task)
 }
 
-tap.test("GET /tasks", async (t) => {
-    const response = await server.get("/tasks");
-    t.equal(response.status, 200);
-    t.hasOwnProp(response.body[0], "id");
-    t.hasOwnProp(response.body[0], "title");
-    t.hasOwnProp(response.body[0], "description");
-    t.hasOwnProp(response.body[0], "completed");
-    t.type(response.body[0].id, "number");
-    t.type(response.body[0].title, "string");
-    t.type(response.body[0].description, "string");
-    t.type(response.body[0].completed, "boolean");
-    t.end();
-  });
-
-const getAllTasks= async(req, res)=>{
-    res.status(200).json(tasks)
+const getAllTasks = async (req, res) => {
+  res.status(200).json(tasks)
 }
 
-    
+const getTaskById = async (req, res) => {
+  const id = parseInt(req.params.id)
+  const task = tasks.find((task) => task.id === id)
+  if (!task) res.status(400).json({ error: 'incorrect id || task not found' })
 
-module.exports = { taskCreated, getAllTasks };
+  res.status(200).json(task)
+}
+
+
+
+module.exports = { taskCreated, getAllTasks, getTaskById }
