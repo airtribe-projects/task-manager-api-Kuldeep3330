@@ -35,6 +35,23 @@ const getTaskById = async (req, res) => {
   res.status(200).json(task)
 }
 
+const updateTaskById= async(req, res)=>{
+    const id= parseInt(req.params.id)
+    const {title, description, completed}= req.body;
+    if(!title || !description || typeof completed !=='boolean'){
+        return res.status(400).json({error:"invalid data"})
+    }
+
+    const taskInd = tasks.findIndex((task) => task.id === id)
+    if (taskInd === -1) res.status(404).json({ error: 'task not found' })
+    
+    tasks[taskInd]={id, title, description, completed}
+
+    fs.writeFileSync(filePath, JSON.stringify({ tasks }, null, 2))
+
+    res.status(200).json(tasks[taskInd])
+}
 
 
-module.exports = { taskCreated, getAllTasks, getTaskById }
+
+module.exports = { taskCreated, getAllTasks, getTaskById, updateTaskById }
