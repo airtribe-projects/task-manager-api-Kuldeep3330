@@ -1,9 +1,12 @@
 const express = require('express');
 const app = express();
+const taskRoutes = require('./routes/tasks.route');
 const port = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api/v1/tasks', taskRoutes)
 
 app.listen(port, (err) => {
     if (err) {
